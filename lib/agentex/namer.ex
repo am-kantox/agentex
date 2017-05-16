@@ -22,18 +22,28 @@ defmodule Agentex.Namer do
                   |> Enum.map(&String.capitalize/1)
         Module.concat([module | modules])
       end
+
+      def concat(mod1, mod2) do
+        [mod1, mod2]
+        |> Enum.map(&Atom.to_string/1)
+        |> Enum.reduce(&String.starts_with?/2)
+        |> if do: mod2, else: Module.concat(mod1, mod2)
+      end
     end
   end
 
   ##############################################################################
 
-  def tables(default) do
-    :agentex
-    |> Application.get_env(:tables, default)
-    |> Enum.map(&Agentex.Namer.table/1)
+  def macroset!(section, key, module, default) do
+    with value <- Application.get_env(section, key, default),
+         :ok <- Application.put_env(section, key, value, persistent: true),
+         :ok <- Module.register_attribute(module, key, accumulate: false),
+         :ok <- Module.put_attribute(module, key, value), do: value
   end
 
-  def table([term]), do: table(term)
+  ##############################################################################
+
+  def table([term | _]) when is_atom(term) or is_binary(term), do: table(term)
   def table(term) when is_atom(term) do
     term
     |> Atom.to_string

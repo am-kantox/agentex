@@ -1,3 +1,3 @@
 use Mix.Config
 
-config :agentex, :tables, [Kv, Store]
+# config :agentex, :bags, [Kv, Store]

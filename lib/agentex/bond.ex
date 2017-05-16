@@ -27,14 +27,18 @@ defmodule Agentex.Bond do
 
   def start_link({db, [table]}), do: start_link({db, table})
   def start_link({db, table}) do
-    GenServer.start_link(__MODULE__, Module.concat(db, table), name: fqname(table))
+    GenServer.start_link(__MODULE__, concat(db, table), name: fqname(table))
   end
 
   ##############################################################################
 
   def handle_call({:get, key}, _from, name) do
-    key_value = Amnesia.transaction(do: apply(name, :read, [key]))
-    {:reply, struct(name, key: key_value.key, value: key_value.value), name}
+    case Amnesia.transaction(do: apply(name, :read, [key])) do
+      nil ->
+        {:reply, nil, name}
+      key_value ->
+        {:reply, struct(name, key: key_value.key, value: key_value.value), name}
+    end
   end
 
   def handle_cast({:put, {key, value}}, name) do
