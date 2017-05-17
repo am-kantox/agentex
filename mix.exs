@@ -17,7 +17,7 @@ defmodule Agentex.Mixfile do
 
   # Run "mix help compile.app" to learn about applications.
   def application do
-    [extra_applications: [:logger, :amnesia], mod: {Agentex, []}]
+    [extra_applications: [:logger, :amnesia], mod: {Agentex, [initialize: false]}]
   end
 
   # Run "mix help deps" to learn about dependencies.

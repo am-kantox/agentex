@@ -1,15 +1,17 @@
 defmodule Agentex.DB do
   @moduledoc false
-  defmacro __using__(opts \\ []) do
+  defmacro __using__(_opts \\ []) do
     quote do
       use Amnesia
       require Logger
 
-      env = unquote(opts[:config]) || :agentex
-      database = Agentex.Namer.macroset!(env, :database, __MODULE__, unquote(opts[:database]) || Agentex.Simple)
-      @bags apply(database, :tables, []) # Agentex.Namer.macroset!(env, :bags, __MODULE__, apply(database, :tables, []))
+      defdatabase Simple do
+        deftable Kv, [:key, :value], type: :ordered_set, index: [:value] do
+          @type t :: %Kv{key: String.t | Atom.t, value: any}
+        end
+      end
 
-      Logger.info "★★★ Declared bags: #{inspect {database, @bags}}"
+      Logger.info "★★★ Declared tables: #{inspect apply(Simple, :tables, [])}"
     end
   end
 end
