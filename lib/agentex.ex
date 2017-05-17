@@ -1,6 +1,12 @@
 defmodule Agentex do
   @moduledoc ~S"""
   Distributed `Agent` implementation, providing multi-node agents on top of Mnesia.
+
+  More on starting distributed apps:
+    http://engineering.pivotal.io/post/how-to-set-up-an-elixir-cluster-on-amazon-ec2/
+
+  More on `mnesia`:
+    http://learnyousomeerlang.com/mnesia
   """
 
   use Application
