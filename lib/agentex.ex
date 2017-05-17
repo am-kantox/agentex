@@ -43,7 +43,7 @@ defmodule Agentex do
     # if preparation[:create], do: Mix.Tasks.Amnesia.Create.run ["-d", Atom.to_string(@database), "--memory"]
 
     {:ok, {i_am_chuck_norris, nodes}} = nodes()
-    Logger.info "★★★ Nodes connected: #{inspect nodes}"
+    Logger.info(fn -> "★★★ Nodes connected: #{inspect nodes}" end)
 
     if i_am_chuck_norris, do: Logger.warn "☆☆☆ I am Chuck Norris!"
 
@@ -68,8 +68,7 @@ defmodule Agentex do
       [strategy: :one_for_one, name: Agentex.Supervisor])
   end
 
-  def stop(state) do
-    IO.inspect state, label: "⚑ STOP"
+  def stop(_state) do
     case nodes() do
       {:ok, {true, _}} ->
         database = Application.get_env(:agentex, :database, Agentex.Simple)

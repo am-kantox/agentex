@@ -1,7 +1,5 @@
-defmodule AgentexTest do
+defmodule Agentex.Test do
+  @moduledoc false
   use ExUnit.Case
   doctest Agentex
-
-  setup do
-  end
 end

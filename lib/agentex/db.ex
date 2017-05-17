@@ -11,7 +11,7 @@ defmodule Agentex.DB do
         end
       end
 
-      Logger.info "★★★ Declared tables: #{inspect apply(Simple, :tables, [])}"
+      Logger.info(fn -> "★★★ Declared tables: #{inspect apply(Simple, :tables, [])}" end)
     end
   end
 end
