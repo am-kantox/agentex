@@ -27,7 +27,7 @@ defmodule Agentex.Namer do
         [mod1, mod2]
         |> Enum.map(&Atom.to_string/1)
         |> Enum.reduce(&String.starts_with?/2)
-        |> if do: mod2, else: Module.concat(mod1, mod2)
+        |> if(do: mod2, else: Module.concat(mod1, mod2))
       end
     end
   end

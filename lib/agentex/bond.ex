@@ -33,6 +33,7 @@ defmodule Agentex.Bond do
   ##############################################################################
 
   def handle_call({:get, key}, _from, name) do
+    Logger.debug(fn -> "☆#{inspect node()} ⇒ getting #{key}" end)
     case Amnesia.transaction(do: apply(name, :read, [key])) do
       nil ->
         {:reply, nil, name}

@@ -13,75 +13,64 @@ defmodule Agentex do
   require Logger
 
   @sleep_time 1_000
+  @wait_for_nodes 3_000
+
   @default_table Agentex.Simple.Kv
 
   defp nodes do
     self = node()
     nodes = :agentex
-            |> Application.get_env(:nodes, [self])
+            |> Application.get_env(:nodes, [self | Node.list])
             |> Enum.filter(fn
                   ^self -> false
                   _ -> true
                end)
     Logger.debug(fn -> "☆#{inspect node()}☆ ⇒ nodes are: #{inspect nodes}" end)
-    wait_for_nodes = Application.get_env(:agentex, :wait_for_nodes, 30_000)
+    wait_for_nodes = Application.get_env(:agentex, :wait_for_nodes, @wait_for_nodes)
     attempts = Integer.floor_div(wait_for_nodes, @sleep_time) + 1
     Enum.any?(1..attempts, fn i ->
       Process.sleep(@sleep_time)
       Enum.each(nodes, &Node.connect/1)
       Logger.debug(fn -> "Attempt ##{i}. Nodes: #{inspect Node.list}" end)
-      Enum.count(Node.list) == Enum.count(nodes)
+      Enum.count(Node.list) >= Enum.count(nodes)
     end)
 
     nodes = [self | Node.list]
+    Logger.info(fn -> "★★★ Nodes connected: #{inspect nodes}" end)
     i_am_chuck_norris = case Enum.sort(nodes) do
                           [^self | _] -> true
                           _ -> false
                         end
-    {:ok, {i_am_chuck_norris, nodes}}
+    {i_am_chuck_norris, nodes}
   end
 
-  defp initialize(preparation) do
-    Amnesia.stop
-    Amnesia.Schema.destroy
+  def database!(Agentex.Simple), do: use(Agentex.DB)
+  def database!(_), do: :ok
 
-    # if preparation[:drop], do: Mix.Tasks.Amnesia.Drop.run ["-d", Atom.to_string(@database)]
-    # if preparation[:create], do: Mix.Tasks.Amnesia.Create.run ["-d", Atom.to_string(@database), "--memory"]
-
-    {:ok, {i_am_chuck_norris, nodes}} = nodes()
-    Logger.info(fn -> "★★★ Nodes connected: #{inspect nodes}" end)
-
-    if i_am_chuck_norris, do: Logger.warn "☆☆☆ I am Chuck Norris!"
-
-    Amnesia.Schema.create(nodes)
+  defp initialize(_preparation) do
     database = Application.get_env(:agentex, :database, Agentex.Simple)
-    if database == Agentex.Simple, do: use(Agentex.DB)
-
-    :rpc.multicall(nodes, Amnesia, :start, [])
-    if i_am_chuck_norris, do: apply(database, :create!, [])
-
+    # Amnesia.start
+    {i_am_chuck_norris, _nodes} = nodes()
+    Agentex.database!(database)
+    if i_am_chuck_norris do
+      apply(database, :destroy, [])
+      apply(database, :create!, []) # [[disk: nodes()]]) # [[memory: nodes]])
+    end
+    Logger.info(fn -> "★★★ Tables used: #{inspect apply(database, :tables, [])}" end)
     database
   end
 
-  def start(_type, args) do
+  def start(type, args) do
+    Logger.warn fn -> "#{__MODULE__}.start(#{inspect type}, #{inspect args}) @ #{Node.self}" end
     import Supervisor.Spec, warn: false
 
     database = initialize(args)
 
+    Logger.warn fn -> "★★★ Starting: #{inspect apply(database, :tables, [])}" end
     Supervisor.start_link(
       Enum.map(apply(database, :tables, []),
         &worker(Agentex.Bond, [{database, &1}], id: Module.concat([Agentex, Bond, database, &1]))),
       [strategy: :one_for_one, name: Agentex.Supervisor])
-  end
-
-  def stop(_state) do
-    case nodes() do
-      {:ok, {true, _}} ->
-        database = Application.get_env(:agentex, :database, Agentex.Simple)
-        apply(database, :destroy!, [])
-        :ok
-      _ -> :ok
-    end
   end
 
   ##############################################################################

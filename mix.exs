@@ -17,7 +17,7 @@ defmodule Agentex.Mixfile do
 
   # Run "mix help compile.app" to learn about applications.
   def application do
-    [extra_applications: [:logger, :amnesia], mod: {Agentex, [initialize: false]}]
+    [applications: [:logger, :amnesia], mod: {Agentex, []}]
   end
 
   # Run "mix help deps" to learn about dependencies.
@@ -32,7 +32,8 @@ defmodule Agentex.Mixfile do
       {:credo, "~> 0.7", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.11", only: :dev},
-      {:mock, "~> 0.2", only: :test}
+      {:mock, "~> 0.2", only: :test},
+      {:distributed_test, github: "am-kantox/distributed_test", branch: "master"}
     ]
   end
 

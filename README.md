@@ -24,6 +24,26 @@ def application do
 end
 ```
 
+## Preparation
+
+### Schema
+
+```sh
+$ iex --cookie agentex -S mix run.distributed
+  Erlang/OTP 19 [erts-8.3] [...]
+
+Interactive Elixir (1.5.0-dev) - [...]
+iex(primary@127.0.0.1)1> nodes = [Node.self | Node.list]                
+iex(primary@127.0.0.1)2> Amnesia.stop
+:stopped
+iex(primary@127.0.0.1)3> :rpc.multicall(nodes, Amnesia, :stop, [])
+{[:stopped, :stopped, :stopped, :stopped, :stopped], []}
+iex(primary@127.0.0.1)4> Amnesia.Schema.destroy
+:ok
+iex(primary@127.0.0.1)5> Amnesia.Schema.create(nodes)
+:ok
+```
+
 ## Usage
 
 ```elixir
