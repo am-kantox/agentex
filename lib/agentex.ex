@@ -15,7 +15,9 @@ defmodule Agentex do
   @sleep_time 1_000
   @wait_for_nodes 3_000
 
-  @default_table Agentex.Simple.Kv
+  @default_database Agentex.Simple
+  @default_bag Kv
+  @default_table Module.concat(@default_database, @default_bag)
 
   defp nodes do
     self = node()
@@ -50,11 +52,11 @@ defmodule Agentex do
   defp initialize(_preparation) do
     database = Application.get_env(:agentex, :database, Agentex.Simple)
     # Amnesia.start
-    {i_am_chuck_norris, _nodes} = nodes()
+    {i_am_chuck_norris, nodes} = nodes()
     Agentex.database!(database)
     if i_am_chuck_norris do
       apply(database, :destroy, [])
-      apply(database, :create!, []) # [[disk: nodes()]]) # [[memory: nodes]])
+      apply(database, :create!, [[disk: nodes]]) # [[memory: nodes]])
     end
     Logger.info(fn -> "★★★ Tables used: #{inspect apply(database, :tables, [])}" end)
     database
@@ -68,7 +70,8 @@ defmodule Agentex do
 
     Logger.warn fn -> "★★★ Starting: #{inspect apply(database, :tables, [])}" end
     Supervisor.start_link(
-      Enum.map(apply(database, :tables, []),
+      # Enum.map(apply(database, :tables, []),
+      Enum.map([@default_table],
         &worker(Agentex.Bond, [{database, &1}], id: Module.concat([Agentex, Bond, database, &1]))),
       [strategy: :one_for_one, name: Agentex.Supervisor])
   end
