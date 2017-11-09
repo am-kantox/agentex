@@ -3,7 +3,7 @@ defmodule Agentex.Test do
   use ExUnit.Case
   doctest Agentex
 
-  @count 10_000
+  @count 1_000
 
   # require IEx
   # IEx.pry(1_000_000)

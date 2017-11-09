@@ -6,7 +6,7 @@ defmodule Agentex.Mixfile do
   def project do
     [
       app: @application,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: "~> 1.4",
       start_permanent: Mix.env == :prod,
       description: description(),
@@ -26,14 +26,14 @@ defmodule Agentex.Mixfile do
       {:gen_stage, "~> 0.11"},
 
       {:poolboy, "~> 1.5"},
-      {:json, "~> 0.3"},
-      {:amnesia, "~> 0.2.7"},
+      {:json, "~> 1.0"},
+      {:amnesia, "~> 0.2"},
 
-      {:credo, "~> 0.7", only: [:dev, :test]},
+      {:credo, "~> 0.8", only: [:dev, :test]},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.11", only: :dev},
       {:mock, "~> 0.2", only: :test},
-      {:distributed_test, github: "am-kantox/distributed_test", branch: "master"}
+      {:test_cluster_task, "~> 0.3", only: [:dev, :test]}
     ]
   end
 
